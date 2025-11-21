@@ -1,29 +1,33 @@
-import { Link } from 'expo-router';
-import { StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import { Button, Modal, TextInput, View } from "react-native";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-
-export default function ModalScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">This is a modal</ThemedText>
-      <Link href="/" dismissTo style={styles.link}>
-        <ThemedText type="link">Go to home screen</ThemedText>
-      </Link>
-    </ThemedView>
-  );
+interface Props {
+  modalVisible: boolean;
+  setModalVisible: (visible: boolean) => void;
+  addTask: (taskText: string) => void;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-});
+export default function TaskModal({ modalVisible, setModalVisible, addTask }: Props) {
+  const [taskText, setTaskText] = useState("");
+
+  const handleSubmit = () => {
+    addTask(taskText);
+    setTaskText("");
+    setModalVisible(false);
+  };
+
+  return (
+    <Modal visible={modalVisible} animationType="slide">
+      <View style={{ padding: 20 }}>
+        <TextInput
+          placeholder="Enter task"
+          value={taskText}
+          onChangeText={setTaskText}
+          style={{ borderWidth: 1, padding: 10, borderRadius: 6 }}
+        />
+        <Button title="Add Task" onPress={handleSubmit} />
+        <Button title="Cancel" onPress={() => setModalVisible(false)} />
+      </View>
+    </Modal>
+  );
+}
