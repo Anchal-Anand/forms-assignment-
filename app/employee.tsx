@@ -3,6 +3,7 @@ import { Text, View } from "react-native";
 import * as Yup from "yup";
 import FormInput from "../components/FormInput";
 import SubmitButton from "../components/SubmitButton";
+import { saveForm } from "../firebase/formService"; // 👈 Step 8 (import)
 
 const EmployeeSchema = Yup.object().shape({
   name: Yup.string().required(),
@@ -26,7 +27,12 @@ export default function EmployeeForm() {
           department: "",
         }}
         validationSchema={EmployeeSchema}
-        onSubmit={(values) => console.log(values)}
+
+        //  — Save to Firestore
+        onSubmit={async (values) => {
+          await saveForm("employeeForms", values);
+          alert("Saved!");
+        }}
       >
         {({ handleChange, handleSubmit }) => (
           <>
@@ -34,16 +40,12 @@ export default function EmployeeForm() {
             <FormInput label="Email" onChangeText={handleChange("email")} />
             <FormInput label="Age" onChangeText={handleChange("age")} />
             <FormInput label="Position" onChangeText={handleChange("position")} />
-            <FormInput
-              label="Department"
-              onChangeText={handleChange("department")}
-            />
+            <FormInput label="Department" onChangeText={handleChange("department")} />
 
-            <SubmitButton title="Sign In" onPress={() => handleSubmit()} />
-                    </>
-                  )}
-                </Formik>
-              </View>
-            );
-          }
-          
+            <SubmitButton title="Submit" onPress={() => handleSubmit()} />
+          </>
+        )}
+      </Formik>
+    </View>
+  );
+}

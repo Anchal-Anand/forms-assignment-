@@ -1,16 +1,29 @@
 import { Formik } from "formik";
-import { Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import * as Yup from "yup";
 import FormInput from "../components/FormInput";
 import SubmitButton from "../components/SubmitButton";
+import { register } from "../firebase/authService"; // Firebase register function
 
+// Validation schema
 const SignUpSchema = Yup.object().shape({
-  name: Yup.string().required("Required"),
-  email: Yup.string().email("Invalid email").required("Required"),
-  password: Yup.string().required("Required"),
+  name: Yup.string().required("Name is required"),
+  email: Yup.string().email("Invalid email").required("Email is required"),
+  password: Yup.string().required("Password is required"),
 });
 
 export default function SignUp() {
+  // Handle registration
+  const handleSignUp = async (values: { name: string; email: string; password: string }) => {
+    try {
+      await register(values.email, values.password);
+      Alert.alert("Success", "Account created successfully!");
+    } catch (error: any) {
+      console.log("Sign Up error:", error);
+      Alert.alert("Sign Up Failed", error.message || "Something went wrong");
+    }
+  };
+
   return (
     <View style={{ padding: 20 }}>
       <Text style={{ fontSize: 26, marginBottom: 20 }}>Sign Up</Text>
@@ -18,21 +31,27 @@ export default function SignUp() {
       <Formik
         initialValues={{ name: "", email: "", password: "" }}
         validationSchema={SignUpSchema}
-        onSubmit={(values) => console.log(values)}
+        onSubmit={handleSignUp}
       >
-        {({ handleChange, handleSubmit, values }) => (
+        {({ handleChange, handleSubmit, values, errors, touched }) => (
           <>
             <FormInput
               label="Name"
               value={values.name}
               onChangeText={handleChange("name")}
             />
+            {touched.name && errors.name && (
+              <Text style={{ color: "red", marginBottom: 10 }}>{errors.name}</Text>
+            )}
 
             <FormInput
               label="Email"
               value={values.email}
               onChangeText={handleChange("email")}
             />
+            {touched.email && errors.email && (
+              <Text style={{ color: "red", marginBottom: 10 }}>{errors.email}</Text>
+            )}
 
             <FormInput
               label="Password"
@@ -40,12 +59,14 @@ export default function SignUp() {
               value={values.password}
               onChangeText={handleChange("password")}
             />
+            {touched.password && errors.password && (
+              <Text style={{ color: "red", marginBottom: 10 }}>{errors.password}</Text>
+            )}
 
-             <SubmitButton title="Sign In" onPress={() => handleSubmit()} />
-                     </>
-                   )}
-                 </Formik>
-               </View>
-             );
-           }
-           
+            <SubmitButton title="Sign Up" onPress={() => handleSubmit()} />
+          </>
+        )}
+      </Formik>
+    </View>
+  );
+}
